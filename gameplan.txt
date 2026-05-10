@@ -1,0 +1,57 @@
+# Road SOS - Architecture & Implementation Plan
+
+## Background & Motivation
+Road SOS is a dual-sided React Native mobile application designed for emergency reporting and response. It empowers citizens to report accidents (either for themselves or others) and enables helpers (ambulances, hospitals) to receive these alerts and navigate to the scene. The app integrates Google OAuth, Firebase for real-time data, and a specialized on-device/edge AI bot for First Aid guidance.
+
+## Scope & Impact
+- **Frameworks:** React Native, Expo, Tailwind CSS (NativeWind).
+- **Backend:** Firebase (Auth, Firestore for profiles/reports, Realtime DB for live tracking).
+- **AI Integration:** Gemma 2B model trained with Unsloth for First Aid guidance.
+
+## Architecture
+
+### 1. User Roles
+- **Citizen:** Can self-report, report for others, chat with the First Aid AI, and track incoming help.
+- **Helper:** Receives emergency alerts, accepts them, and provides real-time location updates while en route.
+
+### 2. Core Screens & Flow
+- **Authentication:** Email and Password via Firebase.
+- **Citizen Helperdashboard:** Map view showing current location, and three severity buttons (Green, Yellow, Red) for instant self-reporting.
+- **Third-Party Report Screen:** Form to submit location, severity, photograph, and description on behalf of someone else.
+- **First Aid Assistant:** Chat interface powered by the First Aid AI model.
+- **Live Tracker:** Map view displaying the real-time location of the accepted helper en route.
+- **Profile:** Manage personal and medical details used for self-reporting.
+
+### 3. Technical Stack Decisions
+- **Routing:** Expo Router for file-based navigation (e.g., `app/(citizen)`, `app/(helper)`, `app/(auth)`).
+- **Database:**
+  - *Firestore:* User profiles, static emergency reports, and AI chat history.
+  - *Realtime Database:* High-frequency, low-latency live tracking of helpers.
+- **AI Model Deployment:** Integrating a local Gemma 2B model on mobile requires native modules (e.g., `react-native-llama` or `MLC LLM`). *Note: This requires moving away from standard Expo Go to Custom Development Builds (EAS Build).*
+
+## Implementation Plan
+
+### Phase 1: Setup & Firebase Integration
+1. Initialize Firebase project and integrate Firebase JS SDK (or React Native Firebase if native features are needed).
+2. Setup Google OAuth login.
+3. Configure Expo Router structure for Authentication, Citizen Tabs, and Helper Tabs.
+
+### Phase 2: Citizen Side Development
+1. **Profile Setup:** Screen to input and save user/medical details to Firestore.
+2. **Helperdashboard:** Implement the map component (`react-native-maps`) and the three severity buttons for self-reporting.
+3. **Report Screen:** Form with image picker and description fields to report on behalf of others.
+
+### Phase 3: Helper Side & Real-Time Tracking
+1. **Helper Helperdashboard:** Feed of incoming emergency reports with "Accept" functionality.
+2. **Live Tracking:** When a helper accepts, publish their location updates to Firebase Realtime DB.
+3. **Citizen Tracker:** Read the helper's location from Realtime DB and display it on the Citizen's map.
+
+### Phase 4: First Aid AI Assistant
+1. Develop the chat UI interface.
+2. Setup the backend/local bridge to interface with the fine-tuned Gemma 2B model. (We will need to finalize whether to start with a cloud-hosted API for speed or immediately tackle the local on-device deployment).
+
+## Verification & Testing
+- Test Google OAuth flows for both new and returning users.
+- Verify that self-reporting instantly pushes to the helper feed.
+- Simulate helper movement to verify real-time tracking latency.
+- Ensure the AI model responds accurately to first-aid scenarios.
