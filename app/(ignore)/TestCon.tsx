@@ -1,7 +1,7 @@
-import React, { useEffect, useState } from 'react';
-import { View, Text, ActivityIndicator, StyleSheet } from 'react-native';
-import { auth, db } from '../../config/firebase';
+import { auth, db } from '@/config/firebase';
 import { collection, getDocs, limit, query } from 'firebase/firestore';
+import React, { useEffect, useState } from 'react';
+import { ActivityIndicator, StyleSheet, Text, View } from 'react-native';
 
 const TestCon = () => {
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading');
